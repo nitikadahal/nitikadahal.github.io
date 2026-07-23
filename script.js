@@ -1,4 +1,106 @@
-// =====================================================
+// ---------------------------------------------------------
+// Nitika Portfolio — script.js
+// Handles: mobile nav toggle, project filtering, typed terminal
+// ---------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+  initNavToggle();
+  initProjectFilter();
+  initTypedTerminal();
+});
+
+// --- Mobile nav toggle ---------------------------------------------------
+function initNavToggle() {
+  const toggle = document.querySelector('.nav-toggle');
+  const nav = document.querySelector('.main-nav');
+  if (!toggle || !nav) return;
+
+  toggle.addEventListener('click', () => {
+    const isOpen = nav.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  // Close menu after clicking a link (useful on mobile)
+  nav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      nav.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+}
+
+// --- Project filter bar ---------------------------------------------------
+function initProjectFilter() {
+  const buttons = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.project-card');
+  const noResults = document.querySelector('.no-results');
+  if (!buttons.length || !cards.length) return;
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+
+      buttons.forEach(b => {
+        b.classList.remove('is-active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-selected', 'true');
+
+      let visibleCount = 0;
+      cards.forEach(card => {
+        const matches = filter === 'all' || card.dataset.category === filter;
+        card.hidden = !matches;
+        if (matches) visibleCount++;
+      });
+
+      if (noResults) noResults.hidden = visibleCount !== 0;
+    });
+  });
+}
+
+// --- Typed terminal effect ---------------------------------------------------
+function initTypedTerminal() {
+  const el = document.getElementById('typed');
+  if (!el) return;
+
+  const commands = [
+    'nmap -sV target.local',
+    'python3 recon_scan.py --target 10.0.0.0/24',
+    './exploit.py --check',
+    'sudo tcpdump -i eth0 -n'
+  ];
+
+  let cmdIndex = 0;
+  let charIndex = 0;
+  let deleting = false;
+
+  function tick() {
+    const current = commands[cmdIndex];
+
+    if (!deleting) {
+      el.textContent = current.slice(0, charIndex + 1);
+      charIndex++;
+      if (charIndex === current.length) {
+        deleting = true;
+        setTimeout(tick, 1400); // pause at full text
+        return;
+      }
+    } else {
+      el.textContent = current.slice(0, charIndex - 1);
+      charIndex--;
+      if (charIndex === 0) {
+        deleting = false;
+        cmdIndex = (cmdIndex + 1) % commands.length;
+      }
+    }
+
+    const speed = deleting ? 30 : 60;
+    setTimeout(tick, speed);
+  }
+
+  tick();
+}// =====================================================
 // 1. Mobile nav toggle
 // =====================================================
 const navToggle = document.querySelector('.nav-toggle');
